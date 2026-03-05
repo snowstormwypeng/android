@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Browser Shell</title>
+    <style>
+        body { margin: 0; font-family: sans-serif; background: #0f172a; color: #e2e8f0; }
+        .wrap { max-width: 860px; margin: 0 auto; padding: 20px; }
+        .card { background: #1e293b; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        button { margin: 4px; padding: 8px 12px; }
+        code { color: #7dd3fc; }
+        #log { white-space: pre-wrap; background: #020617; padding: 12px; border-radius: 8px; min-height: 120px; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h2>浏览器外壳已启动</h2>
+        <div>页面来源：<code>file:///android_asset/Index.html</code></div>
+        <button onclick="enableDebug()">enableDebug(true,100)</button>
+        <button onclick="showVer()">getVersionCode/GetAppVer</button>
+        <button onclick="showAppId()">getAppId</button>
+        <button onclick="requestCamera()">RequestPermission(CAMERA)</button>
+        <button onclick="scanDemo()">ScanQrcode</button>
+        <button onclick="readCardDemo()">readCardBlock/readCardSector</button>
+        <button onclick="reloadHome()">reLoadHome</button>
+        <button onclick="closeApp()">Close</button>
+    </div>
+
+    <div class="card">
+        <h3>日志</h3>
+        <div id="log"></div>
+    </div>
+</div>
+<script>
+    function log(msg) {
+        const box = document.getElementById('log');
+        box.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+    }
+
+    function enableDebug() {
+        window.external.enableDebug(true, 100);
+        log('enableDebug called');
+    }
+
+    function showVer() {
+        log('versionCode=' + window.external.getVersionCode());
+        log('appVer=' + window.external.GetAppVer());
+    }
+
+    function showAppId() {
+        log('appId=' + window.external.getAppId());
+    }
+
+    function onPermissionResult(granted) {
+        log('permission result=' + granted);
+    }
+
+    function requestCamera() {
+        window.external.RequestPermission('android.permission.CAMERA', 'onPermissionResult');
+    }
+
+    function handleScanResult(result) {
+        log('scan result=' + result);
+    }
+
+    function scanDemo() {
+        window.external.ScanQrcode('handleScanResult');
+    }
+
+    function readCardDemo() {
+        log('checkCardCert=' + window.external.checkCardCert());
+        log('block4=' + window.external.readCardBlock(4));
+        log('sector0=' + window.external.readCardSector(0));
+    }
+
+    function reloadHome() {
+        window.external.reLoadHome();
+    }
+
+    function closeApp() {
+        window.external.Close();
+    }
+
+    window.external.setBrushCardEvent('onCardSwiped');
+    function onCardSwiped(cardData) {
+        // cardData: {\"event\":\"enter|leave\",\"cardNo\":\"...\"}
+        log('card event=' + cardData);
+    }
+
+    log('页面初始化完成');
+</script>
+</body>
+</html>
